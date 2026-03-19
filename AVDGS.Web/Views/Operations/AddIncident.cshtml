@@ -1,0 +1,60 @@
+﻿@model AVDGS.Web.Models.ViewModels.AddIncidentVM
+@{
+    ViewData["Title"] = "Add Incident";
+}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+    <div>
+        <h1 class="h2 fw-bold mb-1">Add Incident</h1>
+        <div class="text-secondary">Attach a new incident report to Session #@Model.SessionId</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-light avdgs-btn-ghost"
+           asp-controller="Operations" asp-action="Index">
+            Back to Operations
+        </a>
+    </div>
+</div>
+
+<div class="avdgs-card">
+    <form asp-action="AddIncident" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="SessionId" />
+
+        <div class="row g-3">
+            <div class="col-12 col-lg-3">
+                <label class="form-label text-secondary">Severity</label>
+                <select class="form-select" asp-for="Severity">
+                    <option>LOW</option>
+                    <option>MEDIUM</option>
+                    <option>HIGH</option>
+                </select>
+                <span class="text-danger small" asp-validation-for="Severity"></span>
+            </div>
+
+            <div class="col-12 col-lg-9">
+                <label class="form-label text-secondary">Title</label>
+                <input class="form-control" asp-for="Title" />
+                <span class="text-danger small" asp-validation-for="Title"></span>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label text-secondary">Description</label>
+                <textarea class="form-control" rows="4" asp-for="Description"></textarea>
+                <span class="text-danger small" asp-validation-for="Description"></span>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2">
+                <a class="btn btn-outline-light" asp-controller="Operations" asp-action="Index">Cancel</a>
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-plus-circle me-2"></i>Add Incident
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

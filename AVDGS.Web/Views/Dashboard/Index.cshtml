@@ -1,0 +1,81 @@
+﻿@model AVDGS.Web.Models.ViewModels.DashboardOverviewVM
+@{
+    ViewData["Title"] = "Overview";
+}
+
+<section class="avdgs-hero text-center mx-auto">
+    <span class="badge rounded-pill avdgs-pill mb-3">@Model.BadgeText</span>
+
+    <h1 class="display-3 fw-bold mb-2">
+        @Model.HeroTitleTop<br />
+        <span class="avdgs-accent">@Model.HeroTitleAccent</span>
+    </h1>
+
+    <p class="lead text-secondary-emphasis mx-auto avdgs-hero-sub">
+        @Model.HeroSubtitle
+    </p>
+
+    <div class="avdgs-card mt-4 text-start">
+        <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-activity avdgs-icon"></i>
+            <div class="w-100">
+                <div class="fw-semibold">Live System Status</div>
+                <div class="text-secondary small mb-3">Real-time monitoring of all system components</div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="dot dot-ok"></span>
+                            <span class="text-secondary">Cameras</span>
+                            <span class="ms-1 fw-semibold">@Model.CamerasStatus</span>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="dot dot-ok"></span>
+                            <span class="text-secondary">Sensors</span>
+                            <span class="ms-1 fw-semibold">@Model.SensorsStatus</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mt-5">
+    <h3 class="fw-bold mb-3">Quick Actions</h3>
+
+    <div class="row g-3">
+        @foreach (var a in Model.QuickActions)
+        {
+            <div class="col-12 col-md-6 col-xl-3">
+                <a href="@a.Url" class="avdgs-action card-link">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avdgs-action-icon">
+                            <i class="bi @a.Icon"></i>
+                        </div>
+                        <div class="fw-semibold">@a.Title</div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="mt-5">
+    <h3 class="fw-bold mb-3">System Modules</h3>
+
+    <div class="row g-3">
+        @foreach (var m in Model.Modules)
+        {
+            <div class="col-12 col-lg-4">
+                <a href="@m.Url" class="avdgs-module card-link">
+                    <div class="fw-semibold mb-1">@m.Title</div>
+                    <div class="text-secondary small">@m.Description</div>
+                </a>
+            </div>
+        }
+    </div>
+</section>

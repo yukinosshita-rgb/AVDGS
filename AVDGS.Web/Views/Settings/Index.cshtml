@@ -1,0 +1,395 @@
+﻿@model AVDGS.Web.Models.ViewModels.SettingsVM
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+    <div>
+        <h1 class="h2 fw-bold mb-1">Settings &amp; Configuration</h1>
+        <div class="text-secondary">System calibration and preferences</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-light avdgs-btn-ghost"
+           asp-controller="Dashboard" asp-action="Index">
+            Back to Overview
+        </a>
+    </div>
+</div>
+
+<form asp-action="Save" method="post">
+    @Html.AntiForgeryToken()
+
+    <!-- Settings Tabs -->
+    <div class="avdgs-settings-switch mb-3">
+        <ul class="nav nav-pills avdgs-settings-tabs w-100" id="settingsTabs" role="tablist">
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link active avdgs-settings-tab w-100" data-bs-toggle="tab"
+                        data-bs-target="#tab-camera" type="button" role="tab">
+                    <i class="bi bi-camera me-2"></i> Camera
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link avdgs-settings-tab w-100" data-bs-toggle="tab"
+                        data-bs-target="#tab-aircraft" type="button" role="tab">
+                    <i class="bi bi-airplane me-2"></i> Aircraft
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link avdgs-settings-tab w-100" data-bs-toggle="tab"
+                        data-bs-target="#tab-zones" type="button" role="tab">
+                    <i class="bi bi-geo-alt me-2"></i> Zones
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link avdgs-settings-tab w-100" data-bs-toggle="tab"
+                        data-bs-target="#tab-safety" type="button" role="tab">
+                    <i class="bi bi-shield me-2"></i> Safety
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link avdgs-settings-tab w-100" data-bs-toggle="tab"
+                        data-bs-target="#tab-data" type="button" role="tab">
+                    <i class="bi bi-download me-2"></i> Data
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tab-content" id="settingsTabContent">
+
+        <!-- CAMERA -->
+        <div class="tab-pane fade show active" id="tab-camera" role="tabpanel">
+            <div class="avdgs-card">
+                <div class="fw-semibold fs-5 mb-1">Camera Calibration</div>
+                <div class="text-secondary mb-4">Adjust camera settings and alignment</div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-lg-6">
+                        <label class="fw-semibold mb-2">Brightness</label>
+                        <div class="avdgs-range-wrap">
+                            <input asp-for="Brightness" type="range" min="0" max="100" class="form-range avdgs-range" />
+                            <span class="avdgs-range-val" data-for="Brightness">@Model.Brightness</span>
+                        </div>
+
+                        <label class="fw-semibold mt-4 mb-2">Exposure</label>
+                        <div class="avdgs-range-wrap">
+                            <input asp-for="Exposure" type="range" min="0" max="100" class="form-range avdgs-range" />
+                            <span class="avdgs-range-val" data-for="Exposure">@Model.Exposure</span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-6">
+                        <label class="fw-semibold mb-2">Contrast</label>
+                        <div class="avdgs-range-wrap">
+                            <input asp-for="Contrast" type="range" min="0" max="100" class="form-range avdgs-range" />
+                            <span class="avdgs-range-val" data-for="Contrast">@Model.Contrast</span>
+                        </div>
+
+                        <label class="fw-semibold mt-4 mb-2">Saturation</label>
+                        <div class="avdgs-range-wrap">
+                            <input asp-for="Saturation" type="range" min="0" max="100" class="form-range avdgs-range" />
+                            <span class="avdgs-range-val" data-for="Saturation">@Model.Saturation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary-subtle my-4" />
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="avdgs-toggle-row">
+                            <div>
+                                <div class="fw-semibold">Auto White Balance</div>
+                                <div class="text-secondary small">Automatically adjust color temperature</div>
+                            </div>
+                            <div class="form-check form-switch avdgs-switch">
+                                <input asp-for="AutoWhiteBalance" class="form-check-input" type="checkbox" />
+                            </div>
+                        </div>
+
+                        <div class="avdgs-toggle-row">
+                            <div>
+                                <div class="fw-semibold">HDR Mode</div>
+                                <div class="text-secondary small">High dynamic range imaging</div>
+                            </div>
+                            <div class="form-check form-switch avdgs-switch">
+                                <input asp-for="HDRMode" class="form-check-input" type="checkbox" />
+                            </div>
+                        </div>
+
+                        <div class="avdgs-toggle-row">
+                            <div>
+                                <div class="fw-semibold">Night Vision</div>
+                                <div class="text-secondary small">Enhanced low-light performance</div>
+                            </div>
+                            <div class="form-check form-switch avdgs-switch">
+                                <input asp-for="NightVision" class="form-check-input" type="checkbox" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button type="submit" class="btn btn-info avdgs-btn-primary">Save Calibration</button>
+                    <button type="button" class="btn btn-outline-light avdgs-btn-ghost" onclick="avdgsResetCamera()">Reset to Default</button>
+                    <button type="button" class="btn btn-outline-light avdgs-btn-ghost">Test Camera</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AIRCRAFT -->
+        <div class="tab-pane fade" id="tab-aircraft" role="tabpanel">
+            <div class="avdgs-card">
+                <div class="fw-semibold fs-5 mb-1">Aircraft Presets</div>
+                <div class="text-secondary mb-4">Manage aircraft type configurations</div>
+
+                <div class="avdgs-empty-state">
+                    <div class="text-secondary">No aircraft presets available</div>
+                </div>
+
+                <button type="button" class="btn btn-info avdgs-btn-wide mt-3">
+                    <i class="bi bi-airplane me-2"></i> Add New Aircraft Preset
+                </button>
+            </div>
+        </div>
+
+        <!-- ZONES -->
+        <div class="tab-pane fade" id="tab-zones" role="tabpanel">
+            <div class="avdgs-card">
+                <div class="fw-semibold fs-5 mb-1">Docking Zone Setup</div>
+                <div class="text-secondary mb-4">Configure parking positions and boundaries</div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-lg-6">
+                        <label class="fw-semibold mb-2">Zone Width (m)</label>
+                        <input asp-for="ZoneWidthM" class="form-control avdgs-input" />
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label class="fw-semibold mb-2">Zone Length (m)</label>
+                        <input asp-for="ZoneLengthM" class="form-control avdgs-input" />
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label class="fw-semibold mb-2">Centerline Tolerance (m)</label>
+                        <input asp-for="CenterlineToleranceM" class="form-control avdgs-input" />
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <label class="fw-semibold mb-2">Stop Position (m from gate)</label>
+                        <input asp-for="StopPositionM" class="form-control avdgs-input" />
+                    </div>
+                </div>
+
+                <hr class="border-secondary-subtle my-4" />
+
+                <div class="fw-bold mb-2">Visual Guidance Lines</div>
+
+                <div class="avdgs-toggle-row">
+                    <div class="fw-semibold">Show Centerline</div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="ShowCenterline" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <div class="avdgs-toggle-row">
+                    <div class="fw-semibold">Show Distance Markers</div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="ShowDistanceMarkers" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <div class="avdgs-toggle-row">
+                    <div class="fw-semibold">Show Boundary Lines</div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="ShowBoundaryLines" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-info avdgs-btn-wide mt-4">
+                    Save Zone Configuration
+                </button>
+            </div>
+        </div>
+
+        <!-- SAFETY -->
+        <div class="tab-pane fade" id="tab-safety" role="tabpanel">
+            <div class="avdgs-card">
+                <div class="fw-semibold fs-5 mb-1">Safety Thresholds</div>
+                <div class="text-secondary mb-4">Configure warning and error limits</div>
+
+                <div class="avdgs-slider-row">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="fw-semibold">Maximum Approach Speed (km/h)</label>
+                        <span class="avdgs-slider-num" data-for="MaxApproachSpeedKmh">@Model.MaxApproachSpeedKmh</span>
+                    </div>
+                    <input asp-for="MaxApproachSpeedKmh" type="range" min="0" max="60" class="form-range avdgs-range" />
+                </div>
+
+                <div class="avdgs-slider-row">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="fw-semibold">Maximum Centerline Deviation (m)</label>
+                        <span class="avdgs-slider-num" data-for="MaxCenterlineDeviationM">@Model.MaxCenterlineDeviationM</span>
+                    </div>
+                    <input asp-for="MaxCenterlineDeviationM" type="range" min="0" max="3" step="0.1" class="form-range avdgs-range" />
+                </div>
+
+                <div class="avdgs-slider-row">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="fw-semibold">Minimum AI Confidence (%)</label>
+                        <span class="avdgs-slider-num" data-for="MinAiConfidencePct">@Model.MinAiConfidencePct</span>
+                    </div>
+                    <input asp-for="MinAiConfidencePct" type="range" min="0" max="100" class="form-range avdgs-range" />
+                </div>
+
+                <hr class="border-secondary-subtle my-4" />
+
+                <div class="avdgs-toggle-row">
+                    <div>
+                        <div class="fw-semibold">Emergency Stop Enabled</div>
+                        <div class="text-secondary small">Automatic halt on critical errors</div>
+                    </div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="EmergencyStopEnabled" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <div class="avdgs-toggle-row">
+                    <div>
+                        <div class="fw-semibold">Audio Warnings</div>
+                        <div class="text-secondary small">Sound alerts for threshold violations</div>
+                    </div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="AudioWarnings" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <div class="avdgs-toggle-row">
+                    <div>
+                        <div class="fw-semibold">Manual Override Allowed</div>
+                        <div class="text-secondary small">Permit operator intervention</div>
+                    </div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="ManualOverrideAllowed" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-info avdgs-btn-wide mt-4">
+                    Save Safety Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- DATA -->
+        <div class="tab-pane fade" id="tab-data" role="tabpanel">
+            <div class="avdgs-card">
+                <div class="fw-semibold fs-5 mb-1">Data Export &amp; Backup</div>
+                <div class="text-secondary mb-4">Export operational data and system logs</div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-lg-6">
+                        <button type="button" class="btn btn-outline-light avdgs-btn-export w-100">
+                            <i class="bi bi-download me-2"></i> Export Docking Logs
+                        </button>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <button type="button" class="btn btn-outline-light avdgs-btn-export w-100">
+                            <i class="bi bi-download me-2"></i> Export Training Data
+                        </button>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <button type="button" class="btn btn-outline-light avdgs-btn-export w-100">
+                            <i class="bi bi-download me-2"></i> Export System Logs
+                        </button>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <button type="button" class="btn btn-outline-light avdgs-btn-export w-100">
+                            <i class="bi bi-download me-2"></i> Export Configuration
+                        </button>
+                    </div>
+                </div>
+
+                <div class="avdgs-toggle-row">
+                    <div>
+                        <div class="fw-semibold">Automatic Daily Backup</div>
+                        <div class="text-secondary small">Schedule daily data backups</div>
+                    </div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="AutomaticDailyBackup" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <div class="avdgs-toggle-row">
+                    <div>
+                        <div class="fw-semibold">Include Camera Footage</div>
+                        <div class="text-secondary small">Export video recordings with logs</div>
+                    </div>
+                    <div class="form-check form-switch avdgs-switch">
+                        <input asp-for="IncludeCameraFootage" class="form-check-input" type="checkbox" />
+                    </div>
+                </div>
+
+                <div class="fw-bold mt-4 mb-2">Export Format</div>
+
+                <div class="row g-3">
+                    <div class="col-12 col-lg-4">
+                        <label class="avdgs-radio-card">
+                            <input type="radio" name="ExportFormat" value="CSV" @(Model.ExportFormat == "CSV" ? "checked" : "") />
+                            <span>CSV</span>
+                        </label>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <label class="avdgs-radio-card">
+                            <input type="radio" name="ExportFormat" value="JSON" @(Model.ExportFormat == "JSON" ? "checked" : "") />
+                            <span>JSON</span>
+                        </label>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <label class="avdgs-radio-card">
+                            <input type="radio" name="ExportFormat" value="PDF" @(Model.ExportFormat == "PDF" ? "checked" : "") />
+                            <span>PDF</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        (function(){
+          // Live number readouts for ranges
+          document.querySelectorAll('.avdgs-range').forEach(function(r){
+            const name = r.getAttribute('name');
+            const valSpan = document.querySelector('.avdgs-range-val[data-for="'+name+'"]') ||
+                            document.querySelector('.avdgs-slider-num[data-for="'+name+'"]');
+            if(valSpan){ valSpan.textContent = r.value; }
+            r.addEventListener('input', function(){
+              if(valSpan){ valSpan.textContent = r.value; }
+            });
+          });
+
+          // Also support numeric span for double range (MaxCenterlineDeviationM)
+          const d = document.querySelector('input[name="MaxCenterlineDeviationM"]');
+          if(d){
+            const s = document.querySelector('.avdgs-slider-num[data-for="MaxCenterlineDeviationM"]');
+            if(s){ s.textContent = d.value; }
+            d.addEventListener('input', ()=> { if(s){ s.textContent = d.value; } });
+          }
+        })();
+
+        function avdgsResetCamera(){
+          const set = (n,v)=>{ const el=document.querySelector('input[name="'+n+'"]'); if(el){ el.value=v; el.dispatchEvent(new Event('input')); } };
+          set('Brightness',50);
+          set('Exposure',50);
+          set('Contrast',50);
+          set('Saturation',50);
+
+          const chk=(n,v)=>{ const el=document.querySelector('input[name="'+n+'"]'); if(el){ el.checked=v; } };
+          chk('AutoWhiteBalance', true);
+          chk('HDRMode', false);
+          chk('NightVision', true);
+        }
+    </script>
+}

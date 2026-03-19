@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVDGS.Web", "AVDGS.Web\AVDGS.Web.csproj", "{7D9FA3A0-DB94-4178-B5F5-21633070C6F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVDGS_Models", "..\AVDGS_BD\AVDGS_Models\AVDGS_Models.csproj", "{F14667B0-9440-A2D3-08FC-5F564FDC4489}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVDGS_BLL", "..\AVDGS_BD\AVDGS_DLL\AVDGS_BLL.csproj", "{52CE0273-A3EF-F5EA-0B6A-F94E3C93317A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVDGS_DAL", "..\AVDGS_BD\AVDGS_DAL\AVDGS_DAL.csproj", "{F99BB324-4A4C-D46B-8D64-46FB595D2923}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AVDGS.PythonService", "AVDGS.PythonService", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		app.py = app.py
+		requirements.txt = requirements.txt
+	EndProjectSection
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "AVDGS.PythonService", "AVDGS.PythonService\AVDGS.PythonService.pyproj", "{D05CF35E-F325-4706-B516-A94A79B5858B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "weights", "weights", "{A75660AA-D047-4BF1-907F-F2F6E4919D6E}"
+	ProjectSection(SolutionItems) = preProject
+		AVDGS.PythonService\weights\yolov8n.pt = AVDGS.PythonService\weights\yolov8n.pt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7D9FA3A0-DB94-4178-B5F5-21633070C6F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D9FA3A0-DB94-4178-B5F5-21633070C6F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D9FA3A0-DB94-4178-B5F5-21633070C6F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D9FA3A0-DB94-4178-B5F5-21633070C6F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F14667B0-9440-A2D3-08FC-5F564FDC4489}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F14667B0-9440-A2D3-08FC-5F564FDC4489}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F14667B0-9440-A2D3-08FC-5F564FDC4489}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F14667B0-9440-A2D3-08FC-5F564FDC4489}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52CE0273-A3EF-F5EA-0B6A-F94E3C93317A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52CE0273-A3EF-F5EA-0B6A-F94E3C93317A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52CE0273-A3EF-F5EA-0B6A-F94E3C93317A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52CE0273-A3EF-F5EA-0B6A-F94E3C93317A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F99BB324-4A4C-D46B-8D64-46FB595D2923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F99BB324-4A4C-D46B-8D64-46FB595D2923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F99BB324-4A4C-D46B-8D64-46FB595D2923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F99BB324-4A4C-D46B-8D64-46FB595D2923}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D05CF35E-F325-4706-B516-A94A79B5858B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D05CF35E-F325-4706-B516-A94A79B5858B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D05CF35E-F325-4706-B516-A94A79B5858B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A75660AA-D047-4BF1-907F-F2F6E4919D6E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7D868E4-7244-4069-8FCB-EEADDD3A3AD8}
+	EndGlobalSection
+EndGlobal

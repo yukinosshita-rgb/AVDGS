@@ -1,0 +1,328 @@
+﻿@model AVDGS.Web.Models.ViewModels.LiveDockingVM
+@{
+    ViewData["Title"] = "Docking";
+    var streamUrl = (ViewData["StreamUrl"] as string) ?? "http://127.0.0.1:5001/video";
+}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+    <div>
+        <h1 class="h2 fw-bold mb-1">@Model.PageTitle</h1>
+        <div class="text-secondary">@Model.PageSubtitle</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-light avdgs-btn-ghost"
+           asp-controller="Dashboard" asp-action="Index">
+            Back to Overview
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        <div class="avdgs-card h-100">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-camera avdgs-icon"></i>
+                    <div class="fw-semibold">Live Camera Feed</div>
+                </div>
+
+                <span id="camBadge" class="badge avdgs-live-badge is-off">
+                    <span id="camDot" class="dot dot-off"></span>
+                    <span id="camText">CONNECTING</span>
+                </span>
+            </div>
+
+            <div class="avdgs-camera-frame">
+                <img class="avdgs-camera-img"
+                     id="liveFeed"
+                     src=""
+                     alt="Live camera feed"
+                     loading="eager"
+                     referrerpolicy="no-referrer"
+                     onload="handleStreamLoaded()"
+                     onerror="handleStreamError()" />
+
+                <div class="avdgs-overlay">
+                    <div class="avdgs-overlay-title">@Model.GuidanceText</div>
+                    <div class="avdgs-overlay-sub">@Model.GuidanceDistanceText</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="d-flex flex-column gap-3">
+
+            <div class="avdgs-card">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-airplane avdgs-icon"></i>
+                    <div class="fw-semibold">Aircraft Detection</div>
+                </div>
+                <label class="form-label text-secondary small mb-2">Aircraft Type</label>
+                <select class="form-select avdgs-select" aria-label="Aircraft type">
+                    @foreach (var type in Model.AircraftTypes)
+                    {
+                        <option value="@type" selected="@(type == Model.SelectedAircraftType ? "selected" : null)">
+                            @type
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="avdgs-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-cloud-haze2 avdgs-icon"></i>
+                        <div class="fw-semibold">Environment</div>
+                    </div>
+                    <span class="text-secondary small" id="envUpdated">
+                        @(Model.WeatherObservedAtLocal.HasValue? Model.WeatherObservedAtLocal.Value.ToString("yyyy-MM-dd HH:mm") : "—")
+                    </span>
+                </div>
+
+                <div class="text-secondary small mb-3" id="envLocation">@Model.EnvironmentLocation</div>
+
+                <div class="d-flex flex-column gap-2">
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="dotVisibility" class="dot dot-ok"></span>
+                            <span class="text-secondary">Visibility</span>
+                        </div>
+                        <span class="fw-semibold" id="envVisibility">
+                            @(Model.VisibilityKm > 0 ? Model.VisibilityKm.ToString("0.0") + " km" : "—")
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="dotTemp" class="dot dot-ok"></span>
+                            <span class="text-secondary">Temperature</span>
+                        </div>
+                        <span class="fw-semibold" id="envTemp">
+                            @(Model.TemperatureC != 0 ? Model.TemperatureC + " °C" : "—")
+                        </span>
+                    </div>
+
+                    <!-- ✅ UPDATED -->
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="dotWind" class="dot dot-ok"></span>
+                            <span class="text-secondary">Wind (Dir / Speed / Gust)</span>
+                        </div>
+                        <span class="fw-semibold" id="envWind">
+                            @($"{Model.WindDirectionText} · {Model.WindSpeedKts} / {Model.WindGustKts} kts")
+                        </span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="dotRain" class="dot @(Model.IsRaining ? "dot-warn" : "dot-ok")"></span>
+                            <span class="text-secondary">Rain</span>
+                        </div>
+                        <span class="fw-semibold" id="envRain">@(Model.IsRaining ? "YES" : "NO")</span>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="dotLightning" class="dot @(Model.IsLightning ? "dot-warn" : "dot-ok")"></span>
+                            <span class="text-secondary">Lightning</span>
+                        </div>
+                        <span class="fw-semibold" id="envLightning">@(Model.IsLightning ? "YES" : "NO")</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="avdgs-card">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-lightning-charge avdgs-icon"></i>
+                    <div class="fw-semibold">AI Confidence</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-secondary small">Detection</span>
+                        <span class="fw-semibold">@Model.AIDetectionConfidence.ToString("0.0")%</span>
+                    </div>
+                    <div class="progress avdgs-progress">
+                        <div class="progress-bar" role="progressbar"
+                             style="width:@Model.AIDetectionConfidence.ToString("0.0")%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-secondary small">Alignment</span>
+                        <span class="fw-semibold">@Model.AIAlignmentConfidence.ToString("0.0")%</span>
+                    </div>
+                    <div class="progress avdgs-progress">
+                        <div class="progress-bar" role="progressbar"
+                             style="width:@Model.AIAlignmentConfidence.ToString("0.0")%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn avdgs-manual-btn w-100">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Manual Override
+            </button>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="avdgs-card">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-speedometer2 avdgs-icon"></i>
+                <div class="fw-semibold">Docking Indicators</div>
+            </div>
+            <div class="text-secondary small mb-3">Real-time positioning guidance</div>
+
+            <div class="row g-3 text-center">
+                <div class="col-12 col-md-4">
+                    <div class="text-secondary small">Centerline Offset</div>
+                    <div class="avdgs-metric metric-green">@Model.CenterlineOffsetMeters.ToString("0.0")m</div>
+                    <div class="text-secondary small">Within tolerance</div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="text-secondary small">Distance to Stop</div>
+                    <div class="avdgs-metric metric-cyan">@Model.DistanceToStopMeters.ToString("0.0")m</div>
+                    <div class="text-secondary small">Approaching</div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="text-secondary small">Lateral Adjustment</div>
+                    <div class="avdgs-metric metric-orange">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        @Model.LateralAdjustmentMeters.ToString("0.0")m
+                    </div>
+                    <div class="text-secondary small">@Model.LateralDirection</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const STREAM_URL = "@streamUrl";
+        const FALLBACK_URL = "@Model.CameraFeedImageUrl";
+
+        let retryTimer = null;
+        let retryDelayMs = 800;
+        const maxRetryDelayMs = 5000;
+
+        function setCamBadge(isLive, text) {
+            const badge = document.getElementById("camBadge");
+            const dot = document.getElementById("camDot");
+            const label = document.getElementById("camText");
+
+            if (!badge || !dot || !label) return;
+
+            badge.classList.remove("is-live", "is-off");
+            dot.classList.remove("dot-live", "dot-off");
+
+            if (isLive) {
+                badge.classList.add("is-live");
+                dot.classList.add("dot-live");
+                label.textContent = text || "LIVE";
+            } else {
+                badge.classList.add("is-off");
+                dot.classList.add("dot-off");
+                label.textContent = text || "CONNECTING";
+            }
+        }
+
+        function startStream() {
+            const img = document.getElementById("liveFeed");
+            if (!img) return;
+
+            setCamBadge(false, "CONNECTING");
+
+            const sep = STREAM_URL.includes("?") ? "&" : "?";
+            img.src = STREAM_URL + sep + "_=" + Date.now();
+        }
+
+        window.handleStreamLoaded = function () {
+            setCamBadge(true, "LIVE");
+            retryDelayMs = 800;
+            if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+        }
+
+        window.handleStreamError = function () {
+            const img = document.getElementById("liveFeed");
+            if (!img) return;
+
+            img.src = FALLBACK_URL;
+            if (retryTimer) return;
+
+            setCamBadge(false, "CONNECTING");
+
+            retryTimer = setTimeout(() => {
+                retryTimer = null;
+                startStream();
+                retryDelayMs = Math.min(maxRetryDelayMs, Math.floor(retryDelayMs * 1.4));
+            }, retryDelayMs);
+        }
+
+        // =====================================
+        // LIVE Environment (Weather) Polling
+        // =====================================
+        async function refreshEnvironment() {
+            try {
+                const resp = await fetch('/Docking/Weather', { cache: 'no-store' });
+                const data = await resp.json();
+                if (!data.ok) return;
+
+                const updated = document.getElementById('envUpdated');
+                const loc = document.getElementById('envLocation');
+                if (updated) updated.textContent = data.observedAt ?? '—';
+                if (loc) loc.textContent = data.location ?? '—';
+
+                const vis = document.getElementById('envVisibility');
+                const temp = document.getElementById('envTemp');
+                const wind = document.getElementById('envWind');
+                const rain = document.getElementById('envRain');
+                const light = document.getElementById('envLightning');
+
+                if (vis) vis.textContent = (data.visibilityKm > 0) ? `${Number(data.visibilityKm).toFixed(1)} km` : '—';
+                if (temp) temp.textContent = (data.temperatureC !== undefined) ? `${data.temperatureC} °C` : '—';
+
+ 
+                const dirText = data.windDirectionText ?? '—';
+                if (wind) wind.textContent = `${dirText} · ${data.windSpeedKts} / ${data.windGustKts} kts`;
+
+                if (rain) rain.textContent = data.isRaining ? 'YES' : 'NO';
+                if (light) light.textContent = data.isLightning ? 'YES' : 'NO';
+
+                setDot('dotRain', data.isRaining);
+                setDot('dotLightning', data.isLightning);
+
+                setDotWarnIf('dotVisibility', Number(data.visibilityKm) < 3);
+                setDotWarnIf('dotTemp', Number(data.temperatureC) >= 40);
+                setDotWarnIf('dotWind', Number(data.windGustKts) >= 15);
+            } catch {
+                // keep last values
+            }
+        }
+
+        function setDot(id, isWarn) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('dot-ok', 'dot-warn');
+            el.classList.add(isWarn ? 'dot-warn' : 'dot-ok');
+        }
+
+        function setDotWarnIf(id, condition) {
+            setDot(id, !!condition);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            startStream();
+            refreshEnvironment();
+            setInterval(refreshEnvironment, 60000);
+        });
+    </script>
+}

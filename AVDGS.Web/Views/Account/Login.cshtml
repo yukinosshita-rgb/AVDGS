@@ -1,0 +1,114 @@
+﻿@model AVDGS.Web.Models.ViewModels.LoginVM
+@{
+    Layout = "_Layout";
+
+    // ✅ Hide top nav on Login page
+    ViewData["HideNav"] = true;
+    ViewData["Title"] = "Login";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center px-3 py-5">
+    <div class="w-100" style="max-width: 520px;">
+
+        <div class="avdgs-card p-4 p-md-5 shadow-lg">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <img src="~/image/mock/FastLogo.png"
+                     asp-append-version="true"
+                     alt="FAST Logo"
+                     class="fast-logo mb-3" />
+
+                <div class="login-title">A-VDGS</div>
+                <div class="login-subtitle">Advanced Visual Docking Guidance</div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.GeneralError))
+            {
+                <div class="alert alert-danger small mb-3">
+                    @Model.GeneralError
+                </div>
+            }
+
+            <form asp-action="Login" method="post" novalidate>
+                @Html.AntiForgeryToken()
+                <input asp-for="ReturnUrl" type="hidden" />
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Username</label>
+                    <input asp-for="Username"
+                           class="form-control avdgs-input"
+                           placeholder="Enter username"
+                           autocomplete="username" />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Password</label>
+
+                    <div class="position-relative">
+                        <input asp-for="Password"
+                               id="PasswordInput"
+                               type="password"
+                               class="form-control avdgs-input pe-5"
+                               placeholder="Enter password"
+                               autocomplete="current-password" />
+
+                        <button type="button"
+                                id="TogglePasswordBtn"
+                                class="btn p-0 position-absolute top-50 end-0 translate-middle-y me-3"
+                                style="background: transparent; border: 0; color: inherit;"
+                                aria-label="Show password">
+                            <i class="bi bi-eye" id="TogglePasswordIcon"></i>
+                        </button>
+                    </div>
+
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input asp-for="RememberMe" class="form-check-input" type="checkbox" />
+                        <label asp-for="RememberMe" class="form-check-label text-secondary">
+                            Remember me
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-info avdgs-btn-wide fw-bold">
+                    Login
+                </button>
+
+                <div class="text-center mt-3 small text-secondary">
+                    Training Prototype • FAST Aviation Academy
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function () {
+            const pwd = document.getElementById("PasswordInput");
+            const btn = document.getElementById("TogglePasswordBtn");
+            const icon = document.getElementById("TogglePasswordIcon");
+
+            if (!pwd || !btn || !icon) return;
+
+            btn.addEventListener("click", function () {
+                const isHidden = pwd.type === "password";
+                pwd.type = isHidden ? "text" : "password";
+
+                icon.classList.toggle("bi-eye", !isHidden);
+                icon.classList.toggle("bi-eye-slash", isHidden);
+
+                btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+            });
+        })();
+    </script>
+
+
+}

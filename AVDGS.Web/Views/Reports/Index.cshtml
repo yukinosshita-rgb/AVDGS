@@ -1,0 +1,509 @@
+﻿@model AVDGS.Web.Models.ViewModels.ReportsVM
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Reports";
+
+    var topAircraft = Model.ByAircraft.FirstOrDefault();
+
+    var labelsJson = JsonSerializer.Serialize(Model.ChartAircraftLabels);
+    var sessionsJson = JsonSerializer.Serialize(Model.ChartAircraftSessions);
+    var successRateJson = JsonSerializer.Serialize(Model.ChartAircraftSuccessRate);
+    var centerlineJson = JsonSerializer.Serialize(Model.ChartAircraftAvgCenterline);
+    var stopDistanceJson = JsonSerializer.Serialize(Model.ChartAircraftAvgStopDistance);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/reports-modern.css" asp-append-version="true" />
+}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+    <div class="avdgs-hero">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-bar-chart-line avdgs-icon"></i>
+            <h1 class="h2 fw-bold mb-0">Flight Docking Reports Dashboard</h1>
+        </div>
+
+        <div class="text-secondary mt-2 avdgs-hero-sub">
+            Comprehensive docking analytics, aircraft performance metrics, and visual report summaries for aviation training operations.
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="badge rounded-pill text-bg-dark border rpt-badge-pill">
+                <i class="bi bi-calendar3 me-2"></i>@Model.ReportPeriodLabel
+            </span>
+
+            @if (topAircraft != null)
+            {
+                <span class="badge rounded-pill text-bg-dark border rpt-badge-pill rpt-badge-pill-cyan">
+                    <i class="bi bi-stars me-2"></i>Top Aircraft: @topAircraft.Aircraft (@topAircraft.SuccessRate.ToString("0.0")%)
+                </span>
+            }
+
+            @if (!Model.HasLiveData)
+            {
+                <span class="badge rounded-pill text-bg-dark border rpt-badge-pill">
+                    Demo mode — no live sessions yet
+                </span>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-light avdgs-btn-ghost"
+           asp-controller="Dashboard" asp-action="Index">
+            <i class="bi bi-arrow-left me-2"></i>Back to Overview
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.LoadError))
+{
+    <div class="alert alert-danger mb-4">@Model.LoadError</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="text-secondary small">Total Sessions</div>
+                <i class="bi bi-journal-text avdgs-kpi-ico text-info"></i>
+            </div>
+            <div class="avdgs-metric">@Model.TotalSessions</div>
+            <div class="text-secondary small">All recorded docking attempts</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="text-secondary small">Success Rate</div>
+                <i class="bi bi-graph-up-arrow avdgs-kpi-ico text-success"></i>
+            </div>
+            <div class="avdgs-metric metric-cyan">@Model.OverallSuccessRate.ToString("0.0")%</div>
+            <div class="text-secondary small">Overall docking efficiency</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="text-secondary small">Incident Reports</div>
+                <i class="bi bi-exclamation-octagon avdgs-kpi-ico text-warning"></i>
+            </div>
+            <div class="avdgs-metric metric-orange">@Model.TotalIncidents</div>
+            <div class="text-secondary small">Sessions needing review</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi h-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="text-secondary small">Successful Dockings</div>
+                <i class="bi bi-check2-circle avdgs-kpi-ico text-info"></i>
+            </div>
+            <div class="avdgs-metric metric-green">@Model.TotalSuccessful</div>
+            <div class="text-secondary small">Completed without incident</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="avdgs-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-trophy avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold fs-5">Top Performing Aircraft</div>
+                    <div class="text-secondary small">Poster-style success comparison by aircraft type</div>
+                </div>
+            </div>
+
+            @if (Model.ByAircraft.Count == 0)
+            {
+                <div class="text-secondary">No aircraft analytics available yet.</div>
+            }
+            else
+            {
+                <div class="rpt-poster-grid mt-3">
+                    @foreach (var a in Model.ByAircraft.Take(6))
+                    {
+                        <div class="rpt-poster-item">
+                            <div class="rpt-poster-value">@a.SuccessRate.ToString("0.0")%</div>
+                            <div class="rpt-poster-plane">
+                                <i class="bi bi-airplane-fill"></i>
+                            </div>
+
+                            <div class="rpt-poster-stage">
+                                <div class="rpt-poster-axis"></div>
+                                <div class="rpt-poster-bar" style="height:@a.VisualHeightPx;">
+                                    <span class="rpt-poster-bar-text">@a.Aircraft</span>
+                                </div>
+                            </div>
+
+                            <div class="rpt-poster-name">@a.Aircraft</div>
+                            <div class="rpt-poster-meta">@a.SessionsText</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-xl-6">
+        <div class="avdgs-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-bar-chart avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold fs-5">Success Rate by Aircraft</div>
+                    <div class="text-secondary small">Bar graph of aircraft success performance</div>
+                </div>
+            </div>
+
+            <div class="rpt-chart-wrap">
+                <canvas id="successRateBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+        <div class="avdgs-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-pie-chart avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold fs-5">Session Distribution by Aircraft</div>
+                    <div class="text-secondary small">Doughnut chart of total docking sessions</div>
+                </div>
+            </div>
+
+            <div class="rpt-chart-wrap">
+                <canvas id="sessionPieChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="avdgs-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-graph-up avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold fs-5">Precision Metrics by Aircraft</div>
+                    <div class="text-secondary small">Comparison of centerline offset and stop distance error</div>
+                </div>
+            </div>
+
+            <div class="rpt-chart-wrap rpt-chart-wrap-lg">
+                <canvas id="precisionLineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-xl-7">
+        <div class="avdgs-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-clock-history avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold fs-5">Recent Docking Sessions</div>
+                    <div class="text-secondary small">Latest recorded docking activity</div>
+                </div>
+            </div>
+
+            <div class="table-responsive rpt-table">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-secondary">
+                            <th>AIRCRAFT</th>
+                            <th>TIMESTAMP</th>
+                            <th>OUTCOME</th>
+                            <th class="text-end">CENTERLINE</th>
+                            <th class="text-end">STOP ERROR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RecentDockingSessions.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5" class="text-secondary">No docking sessions found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var r in Model.RecentDockingSessions)
+                            {
+                                var centerCss = Math.Abs(r.CenterlineM) >= 0.40 ? "rpt-bad" : (Math.Abs(r.CenterlineM) >= 0.20 ? "rpt-warn" : "rpt-good");
+                                var stopCss = Math.Abs(r.DistToStopM) >= 0.80 ? "rpt-bad" : (Math.Abs(r.DistToStopM) >= 0.50 ? "rpt-warn" : "rpt-good");
+
+                                <tr>
+                                    <td class="fw-semibold">@r.Aircraft</td>
+                                    <td class="text-secondary">@r.TimestampLocal.ToString("MMM d, yyyy, hh:mm tt")</td>
+                                    <td>
+                                        <span class="rpt-chip @r.OutcomeCss">
+                                            <i class="bi @r.OutcomeIcon me-1"></i>@r.Outcome
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-semibold @centerCss">@r.CenterlineM.ToString("0.00")m</td>
+                                    <td class="text-end fw-semibold @stopCss">@r.DistToStopM.ToString("0.00")m</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-xl-5">
+        <div class="avdgs-card h-100">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-airplane-engines avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold fs-5">Aircraft Breakdown</div>
+                    <div class="text-secondary small">Quick summary by aircraft type</div>
+                </div>
+            </div>
+
+            @if (Model.ByAircraft.Count == 0)
+            {
+                <div class="text-secondary">No aircraft breakdown available yet.</div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3 mt-2">
+                    @foreach (var a in Model.ByAircraft)
+                    {
+                        var progressWidth = $"{a.SuccessRate.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)}%";
+                        var progressClass = a.SuccessRate >= 90 ? "avdgs-progress-cyan" : (a.SuccessRate >= 75 ? "avdgs-progress-cyan" : "avdgs-progress-green");
+
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <div class="fw-semibold">@a.Aircraft</div>
+                                    <div class="text-secondary small">@a.SessionsText</div>
+                                </div>
+                                <div class="text-info fw-bold">@a.SuccessRate.ToString("0.0")%</div>
+                            </div>
+
+                            <div class="avdgs-progress">
+                                <div class="progress-bar @progressClass" style="width:@progressWidth"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-between text-secondary small mt-2">
+                                <span>Average offset</span>
+                                <span>@a.AvgOffsetM.ToString("0.00")m</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12">
+        <div class="avdgs-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-grid-1x2 avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold fs-5">Aircraft Performance Summary</div>
+                    <div class="text-secondary small">Consolidated metrics per aircraft type</div>
+                </div>
+            </div>
+
+            <div class="table-responsive rpt-table">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="text-secondary">
+                            <th>AIRCRAFT TYPE</th>
+                            <th class="text-center">TOTAL</th>
+                            <th class="text-center">SUCCESSFUL</th>
+                            <th class="text-center">INCIDENTS</th>
+                            <th class="text-center">SUCCESS RATE</th>
+                            <th class="text-end">AVG CENTERLINE</th>
+                            <th class="text-end">AVG STOP ERROR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.PerformanceSummary.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-secondary">No summary data yet.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var p in Model.PerformanceSummary)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@p.Aircraft</td>
+                                    <td class="text-center">@p.Total</td>
+                                    <td class="text-center text-success">@p.Successful</td>
+                                    <td class="text-center text-warning">@p.Incidents</td>
+                                    <td class="text-center">
+                                        <span class="rpt-chip @p.PerformanceToneCss">@p.SuccessRate.ToString("0.0")%</span>
+                                    </td>
+                                    <td class="text-end text-secondary">@p.AvgCenterlineM.ToString("0.00")m</td>
+                                    <td class="text-end text-secondary">@p.AvgDistToStopM.ToString("0.00")m</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script>
+        const labels = @Html.Raw(labelsJson);
+        const sessions = @Html.Raw(sessionsJson);
+        const successRates = @Html.Raw(successRateJson);
+        const avgCenterline = @Html.Raw(centerlineJson);
+        const avgStopDistance = @Html.Raw(stopDistanceJson);
+
+        const tickColor = '#9fb3c8';
+        const gridColor = 'rgba(255,255,255,.08)';
+        const legendColor = '#dceeff';
+
+        Chart.defaults.color = tickColor;
+        Chart.defaults.borderColor = gridColor;
+        Chart.defaults.font.family = 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif';
+
+        if (labels.length > 0) {
+            const successRateBarCtx = document.getElementById('successRateBarChart');
+            new Chart(successRateBarCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Success Rate (%)',
+                        data: successRates,
+                        backgroundColor: 'rgba(0, 200, 255, 0.75)',
+                        borderColor: 'rgba(0, 200, 255, 1)',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: legendColor }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: tickColor },
+                            grid: { display: false }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: { color: tickColor },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+
+            const pieCtx = document.getElementById('sessionPieChart');
+            new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sessions',
+                        data: sessions,
+                        backgroundColor: [
+                            'rgba(0, 200, 255, 0.90)',
+                            'rgba(34, 211, 238, 0.86)',
+                            'rgba(0, 120, 255, 0.82)',
+                            'rgba(102, 231, 255, 0.80)',
+                            'rgba(59, 130, 246, 0.82)',
+                            'rgba(14, 165, 233, 0.82)',
+                            'rgba(6, 182, 212, 0.82)',
+                            'rgba(56, 189, 248, 0.82)'
+                        ],
+                        borderColor: '#0b1119',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '58%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: legendColor,
+                                padding: 14
+                            }
+                        }
+                    }
+                }
+            });
+
+            const precisionCtx = document.getElementById('precisionLineChart');
+            new Chart(precisionCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Avg Centerline Offset (m)',
+                            data: avgCenterline,
+                            borderColor: 'rgba(0, 200, 255, 1)',
+                            backgroundColor: 'rgba(0, 200, 255, 0.10)',
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 5
+                        },
+                        {
+                            label: 'Avg Stop Distance Error (m)',
+                            data: avgStopDistance,
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.08)',
+                            tension: 0.35,
+                            fill: true,
+                            pointRadius: 4,
+                            pointHoverRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: legendColor }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: tickColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: tickColor },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+}

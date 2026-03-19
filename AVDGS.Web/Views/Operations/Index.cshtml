@@ -1,0 +1,579 @@
+﻿@model AVDGS.Web.Models.ViewModels.OperationsDashboardVM
+@{
+    ViewData["Title"] = "Operations";
+
+    string NextDir(string col) =>
+        (Model.SortBy == col && Model.SortDir == "ASC") ? "DESC" : "ASC";
+
+    string SortIcon(string col) =>
+        (Model.SortBy == col) ? (Model.SortDir == "ASC" ? "▲" : "▼") : "";
+}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+    <div>
+        <h1 class="h2 fw-bold mb-1">@Model.PageTitle</h1>
+        <div class="text-secondary">@Model.PageSubtitle</div>
+
+        @if (TempData["OpsMsg"] != null)
+        {
+            <div class="alert alert-success mt-2 mb-0 py-2">@TempData["OpsMsg"]</div>
+        }
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-light avdgs-btn-ghost"
+           asp-controller="Dashboard" asp-action="Index">
+            Back to Overview
+        </a>
+
+        <a class="btn btn-info"
+           asp-controller="Operations" asp-action="Entry">
+            <i class="bi bi-plus-circle me-2"></i>Manual Entry
+        </a>
+    </div>
+</div>
+
+<!-- KPI ROW -->
+<div class="row g-3 mb-3">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-secondary small">Total Sessions</div>
+                <i class="bi bi-file-earmark-text avdgs-kpi-ico text-info"></i>
+            </div>
+            <div class="display-6 fw-bold mt-1">@Model.TotalSessions</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-secondary small">Success Rate</div>
+                <i class="bi bi-graph-up-arrow avdgs-kpi-ico text-success"></i>
+            </div>
+            <div class="display-6 fw-bold mt-1">@Model.SuccessRate.ToString("0.0")%</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-secondary small">Incidents</div>
+                <i class="bi bi-exclamation-circle avdgs-kpi-ico text-warning"></i>
+            </div>
+            <div class="display-6 fw-bold mt-1">@Model.Incidents</div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="avdgs-kpi">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-secondary small">Avg Duration</div>
+                <i class="bi bi-clock avdgs-kpi-ico text-primary"></i>
+            </div>
+            <div class="display-6 fw-bold mt-1">
+                @Model.AvgDurationMinutes.ToString("0.0")
+                <span class="fs-5 fw-semibold text-secondary">min</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Docking Sessions -->
+<div class="avdgs-card mb-3">
+    <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+        <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-file-earmark-text avdgs-icon"></i>
+            <div>
+                <div class="fw-semibold">@Model.RecentDockingSessionsTitle</div>
+                <div class="text-secondary small">@Model.RecentDockingSessionsSubtitle</div>
+            </div>
+        </div>
+
+        <button class="btn btn-outline-light btn-sm"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#presetPanel"
+                aria-expanded="false"
+                aria-controls="presetPanel">
+            <i class="bi bi-sliders2 me-2"></i>Presets
+        </button>
+    </div>
+
+    <div class="collapse" id="presetPanel">
+        <div class="border border-secondary-subtle rounded-3 p-3 mb-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Whole From</label>
+                    <input type="text" class="form-control"
+                           name="from"
+                           placeholder="dd/mm/yyyy"
+                           value="@Model.FilterFromRaw" />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">To</label>
+                    <input type="text" class="form-control"
+                           name="to"
+                           placeholder="dd/mm/yyyy"
+                           value="@Model.FilterToRaw" />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Session</label>
+                    <input type="number" class="form-control"
+                           name="sessionId"
+                           placeholder="#ID"
+                           value="@(Model.FilterSessionId?.ToString() ?? "")" />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Aircraft</label>
+                    <select class="form-select" name="aircraftTypeId">
+                        @foreach (var opt in Model.AircraftFilterOptions)
+                        {
+                            <option value="@opt.Value" selected="@(opt.Selected ? "selected" : null)">@opt.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Mode</label>
+                    <select class="form-select" name="modeId">
+                        @foreach (var opt in Model.ModeFilterOptions)
+                        {
+                            <option value="@opt.Value" selected="@(opt.Selected ? "selected" : null)">@opt.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Outcome</label>
+                    <select class="form-select" name="outcome">
+                        <option value="" selected="@(string.IsNullOrWhiteSpace(Model.FilterOutcome) ? "selected" : null)">All</option>
+                        <option value="SUCCESS" selected="@(Model.FilterOutcome?.ToUpper() == "SUCCESS" ? "selected" : null)">SUCCESS</option>
+                        <option value="FAILED" selected="@(Model.FilterOutcome?.ToUpper() == "FAILED" ? "selected" : null)">FAILED</option>
+                    </select>
+                </div>
+
+                <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                <input type="hidden" name="sortDir" value="@Model.SortDir" />
+
+                <!-- ✅ preserve incident filters when applying session presets -->
+                <input type="hidden" name="incFrom" value="@Model.IncFilterFromRaw" />
+                <input type="hidden" name="incTo" value="@Model.IncFilterToRaw" />
+                <input type="hidden" name="incSessionId" value="@(Model.IncFilterSessionId?.ToString() ?? "")" />
+                <input type="hidden" name="incSeverity" value="@Model.IncFilterSeverity" />
+                <input type="hidden" name="incQ" value="@Model.IncFilterQuery" />
+
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <a class="btn btn-outline-light"
+                       asp-controller="Operations" asp-action="Index">Reset</a>
+
+                    <button class="btn btn-primary" type="submit">
+                        Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.HasDockingSessions)
+    {
+        <div class="avdgs-empty-state">
+            <div class="text-secondary">No docking sessions found.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive avdgs-table-scroll">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr class="text-secondary">
+                        <th>
+                            <a class="text-decoration-none text-light"
+                               asp-action="Index"
+                               asp-route-from="@Model.FilterFromRaw"
+                               asp-route-to="@Model.FilterToRaw"
+                               asp-route-sessionId="@Model.FilterSessionId"
+                               asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                               asp-route-modeId="@Model.FilterModeId"
+                               asp-route-outcome="@Model.FilterOutcome"
+                               asp-route-sortBy="Session"
+                               asp-route-sortDir="@NextDir("Session")"
+                               asp-route-incFrom="@Model.IncFilterFromRaw"
+                               asp-route-incTo="@Model.IncFilterToRaw"
+                               asp-route-incSessionId="@Model.IncFilterSessionId"
+                               asp-route-incSeverity="@Model.IncFilterSeverity"
+                               asp-route-incQ="@Model.IncFilterQuery">
+                                Session @SortIcon("Session")
+                            </a>
+                        </th>
+
+                        <th>
+                            <a class="text-decoration-none text-light"
+                               asp-action="Index"
+                               asp-route-from="@Model.FilterFromRaw"
+                               asp-route-to="@Model.FilterToRaw"
+                               asp-route-sessionId="@Model.FilterSessionId"
+                               asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                               asp-route-modeId="@Model.FilterModeId"
+                               asp-route-outcome="@Model.FilterOutcome"
+                               asp-route-sortBy="Aircraft"
+                               asp-route-sortDir="@NextDir("Aircraft")"
+                               asp-route-incFrom="@Model.IncFilterFromRaw"
+                               asp-route-incTo="@Model.IncFilterToRaw"
+                               asp-route-incSessionId="@Model.IncFilterSessionId"
+                               asp-route-incSeverity="@Model.IncFilterSeverity"
+                               asp-route-incQ="@Model.IncFilterQuery">
+                                Aircraft @SortIcon("Aircraft")
+                            </a>
+                        </th>
+
+                        <th>
+                            <a class="text-decoration-none text-light"
+                               asp-action="Index"
+                               asp-route-from="@Model.FilterFromRaw"
+                               asp-route-to="@Model.FilterToRaw"
+                               asp-route-sessionId="@Model.FilterSessionId"
+                               asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                               asp-route-modeId="@Model.FilterModeId"
+                               asp-route-outcome="@Model.FilterOutcome"
+                               asp-route-sortBy="Mode"
+                               asp-route-sortDir="@NextDir("Mode")"
+                               asp-route-incFrom="@Model.IncFilterFromRaw"
+                               asp-route-incTo="@Model.IncFilterToRaw"
+                               asp-route-incSessionId="@Model.IncFilterSessionId"
+                               asp-route-incSeverity="@Model.IncFilterSeverity"
+                               asp-route-incQ="@Model.IncFilterQuery">
+                                Mode @SortIcon("Mode")
+                            </a>
+                        </th>
+
+                        <th>
+                            <a class="text-decoration-none text-light"
+                               asp-action="Index"
+                               asp-route-from="@Model.FilterFromRaw"
+                               asp-route-to="@Model.FilterToRaw"
+                               asp-route-sessionId="@Model.FilterSessionId"
+                               asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                               asp-route-modeId="@Model.FilterModeId"
+                               asp-route-outcome="@Model.FilterOutcome"
+                               asp-route-sortBy="Start"
+                               asp-route-sortDir="@NextDir("Start")"
+                               asp-route-incFrom="@Model.IncFilterFromRaw"
+                               asp-route-incTo="@Model.IncFilterToRaw"
+                               asp-route-incSessionId="@Model.IncFilterSessionId"
+                               asp-route-incSeverity="@Model.IncFilterSeverity"
+                               asp-route-incQ="@Model.IncFilterQuery">
+                                Start @SortIcon("Start")
+                            </a>
+                        </th>
+
+                        <th>
+                            <a class="text-decoration-none text-light"
+                               asp-action="Index"
+                               asp-route-from="@Model.FilterFromRaw"
+                               asp-route-to="@Model.FilterToRaw"
+                               asp-route-sessionId="@Model.FilterSessionId"
+                               asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                               asp-route-modeId="@Model.FilterModeId"
+                               asp-route-outcome="@Model.FilterOutcome"
+                               asp-route-sortBy="End"
+                               asp-route-sortDir="@NextDir("End")"
+                               asp-route-incFrom="@Model.IncFilterFromRaw"
+                               asp-route-incTo="@Model.IncFilterToRaw"
+                               asp-route-incSessionId="@Model.IncFilterSessionId"
+                               asp-route-incSeverity="@Model.IncFilterSeverity"
+                               asp-route-incQ="@Model.IncFilterQuery">
+                                End @SortIcon("End")
+                            </a>
+                        </th>
+
+                        <th class="text-end">
+                            <a class="text-decoration-none text-light"
+                               asp-action="Index"
+                               asp-route-from="@Model.FilterFromRaw"
+                               asp-route-to="@Model.FilterToRaw"
+                               asp-route-sessionId="@Model.FilterSessionId"
+                               asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                               asp-route-modeId="@Model.FilterModeId"
+                               asp-route-outcome="@Model.FilterOutcome"
+                               asp-route-sortBy="Duration"
+                               asp-route-sortDir="@NextDir("Duration")"
+                               asp-route-incFrom="@Model.IncFilterFromRaw"
+                               asp-route-incTo="@Model.IncFilterToRaw"
+                               asp-route-incSessionId="@Model.IncFilterSessionId"
+                               asp-route-incSeverity="@Model.IncFilterSeverity"
+                               asp-route-incQ="@Model.IncFilterQuery">
+                                Duration @SortIcon("Duration")
+                            </a>
+                        </th>
+
+                        <th class="text-center">
+                            <a class="text-decoration-none text-light"
+                               asp-action="Index"
+                               asp-route-from="@Model.FilterFromRaw"
+                               asp-route-to="@Model.FilterToRaw"
+                               asp-route-sessionId="@Model.FilterSessionId"
+                               asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                               asp-route-modeId="@Model.FilterModeId"
+                               asp-route-outcome="@Model.FilterOutcome"
+                               asp-route-sortBy="Outcome"
+                               asp-route-sortDir="@NextDir("Outcome")"
+                               asp-route-incFrom="@Model.IncFilterFromRaw"
+                               asp-route-incTo="@Model.IncFilterToRaw"
+                               asp-route-incSessionId="@Model.IncFilterSessionId"
+                               asp-route-incSeverity="@Model.IncFilterSeverity"
+                               asp-route-incQ="@Model.IncFilterQuery">
+                                Outcome @SortIcon("Outcome")
+                            </a>
+                        </th>
+
+                        <th class="text-center">Incidents</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var s in Model.RecentSessions)
+                    {
+                        <tr>
+                            <td>#@s.SessionId</td>
+                            <td>@s.AircraftType</td>
+                            <td>@s.Mode</td>
+                            <td>@s.StartTimeLocal.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@s.EndTimeLocal.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-end">@s.DurationMinutes.ToString("0.0") min</td>
+                            <td class="text-center"><span class="@s.OutcomeCss">@s.OutcomeText</span></td>
+                            <td class="text-center">@s.IncidentCount</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-warning"
+                                   asp-controller="Operations" asp-action="AddIncident" asp-route-id="@s.SessionId">
+                                    Add Incident
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-12 col-lg-6">
+        <div class="avdgs-card h-100">
+            <div class="d-flex align-items-start gap-2 mb-3">
+                <i class="bi bi-bar-chart-line avdgs-icon"></i>
+                <div>
+                    <div class="fw-semibold">Success Rate by Aircraft Type</div>
+                    <div class="text-secondary small">Performance breakdown</div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+                @foreach (var a in Model.SuccessByAircraft)
+                {
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-secondary">@a.AircraftType</div>
+                            <div class="fw-semibold">@a.SuccessRate.ToString("0.0")%</div>
+                        </div>
+
+                        <div class="progress avdgs-progress">
+                            <div class="progress-bar avdgs-progress-green" role="progressbar"
+                                 style="width:@a.SuccessRate.ToString("0.0")%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="avdgs-card h-100">
+            <div class="fw-semibold mb-1">Operation Mode Comparison</div>
+            <div class="text-secondary small mb-3">Manual Override vs A-VDGS Assisted</div>
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-secondary">Manual Override Success</div>
+                    <div class="fw-semibold text-warning">@Model.ManualOverrideSuccess.ToString("0.0")%</div>
+                </div>
+                <div class="progress avdgs-progress">
+                    <div class="progress-bar" role="progressbar"
+                         style="width:@Model.ManualOverrideSuccess.ToString("0.0")%"></div>
+                </div>
+            </div>
+
+            <div class="mb-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-secondary">A-VDGS Assisted Success</div>
+                    <div class="fw-semibold text-info">@Model.AvdgsAssistedSuccess.ToString("0.0")%</div>
+                </div>
+                <div class="progress avdgs-progress">
+                    <div class="progress-bar" role="progressbar"
+                         style="width:@Model.AvdgsAssistedSuccess.ToString("0.0")%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Recent Incident Reports (Top 5 + Presets + Scroll Panel) -->
+<div class="avdgs-card">
+    <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-circle avdgs-icon text-warning"></i>
+            <div>
+                <div class="fw-semibold fs-5">@Model.RecentIncidentReportsTitle</div>
+                <div class="text-secondary small">@Model.RecentIncidentReportsSubtitle</div>
+            </div>
+        </div>
+
+        <!-- ✅ INCIDENT PRESETS BUTTON -->
+        <button class="btn btn-outline-light btn-sm"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#incPresetPanel"
+                aria-expanded="false"
+                aria-controls="incPresetPanel">
+            <i class="bi bi-sliders2 me-2"></i>Presets
+        </button>
+    </div>
+
+    <!-- ✅ INCIDENT PRESETS PANEL -->
+    <div class="collapse" id="incPresetPanel">
+        <div class="border border-secondary-subtle rounded-3 p-3 mb-3">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Whole From</label>
+                    <input type="text" class="form-control"
+                           name="incFrom"
+                           placeholder="dd/mm/yyyy"
+                           value="@Model.IncFilterFromRaw" />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">To</label>
+                    <input type="text" class="form-control"
+                           name="incTo"
+                           placeholder="dd/mm/yyyy"
+                           value="@Model.IncFilterToRaw" />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Session</label>
+                    <input type="number" class="form-control"
+                           name="incSessionId"
+                           placeholder="#ID"
+                           value="@(Model.IncFilterSessionId?.ToString() ?? "")" />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-secondary small mb-1">Severity</label>
+                    <select class="form-select" name="incSeverity">
+                        <option value="" selected="@(string.IsNullOrWhiteSpace(Model.IncFilterSeverity) ? "selected" : null)">All</option>
+                        <option value="LOW" selected="@(Model.IncFilterSeverity?.ToUpper() == "LOW" ? "selected" : null)">LOW</option>
+                        <option value="MEDIUM" selected="@(Model.IncFilterSeverity?.ToUpper() == "MEDIUM" ? "selected" : null)">MEDIUM</option>
+                        <option value="HIGH" selected="@(Model.IncFilterSeverity?.ToUpper() == "HIGH" ? "selected" : null)">HIGH</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label class="form-label text-secondary small mb-1">Keyword</label>
+                    <input type="text" class="form-control"
+                           name="incQ"
+                           placeholder="Title / Description"
+                           value="@Model.IncFilterQuery" />
+                </div>
+
+                <!-- ✅ preserve session filters + sorting when applying incident presets -->
+                <input type="hidden" name="from" value="@Model.FilterFromRaw" />
+                <input type="hidden" name="to" value="@Model.FilterToRaw" />
+                <input type="hidden" name="sessionId" value="@(Model.FilterSessionId?.ToString() ?? "")" />
+                <input type="hidden" name="aircraftTypeId" value="@(Model.FilterAircraftTypeId?.ToString() ?? "")" />
+                <input type="hidden" name="modeId" value="@(Model.FilterModeId?.ToString() ?? "")" />
+                <input type="hidden" name="outcome" value="@Model.FilterOutcome" />
+                <input type="hidden" name="sortBy" value="@Model.SortBy" />
+                <input type="hidden" name="sortDir" value="@Model.SortDir" />
+
+                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                    <!-- Reset incident filters only (keep session state) -->
+                    <a class="btn btn-outline-light"
+                       asp-controller="Operations" asp-action="Index"
+                       asp-route-from="@Model.FilterFromRaw"
+                       asp-route-to="@Model.FilterToRaw"
+                       asp-route-sessionId="@Model.FilterSessionId"
+                       asp-route-aircraftTypeId="@Model.FilterAircraftTypeId"
+                       asp-route-modeId="@Model.FilterModeId"
+                       asp-route-outcome="@Model.FilterOutcome"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDir="@Model.SortDir">
+                        Reset
+                    </a>
+
+                    <button class="btn btn-primary" type="submit">
+                        Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.RecentIncidents.Count == 0)
+    {
+        <div class="text-secondary">No incident reports yet.</div>
+    }
+    else
+    {
+        <!-- ✅ SCROLL PANEL (same idea as sessions) -->
+        <div class="avdgs-incident-scroll d-flex flex-column gap-3">
+            @foreach (var i in Model.RecentIncidents)
+            {
+                <div class="avdgs-incident">
+                    <div class="d-flex align-items-start justify-content-between gap-3">
+                        <div class="d-flex align-items-start gap-3">
+                            <span class="sev-pill @i.SeverityCss">@i.Severity.ToUpper()</span>
+
+                            <div>
+                                <div class="fw-semibold fs-5 mb-1">@i.Title</div>
+                                <div class="text-secondary">@i.Description</div>
+                                <div class="text-secondary small mt-1">Session: #@i.SessionId</div>
+                            </div>
+                        </div>
+
+                        <div class="text-secondary small pt-1">
+                            @i.Date.ToString("yyyy-MM-dd HH:mm")
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .avdgs-table-scroll {
+        max-height: 340px;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+
+        .avdgs-table-scroll thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: rgba(18, 22, 28, 0.98);
+            backdrop-filter: blur(6px);
+        }
+
+    /* ✅ Same "scroll container" concept for incident list */
+    .avdgs-incident-scroll {
+        max-height: 340px;
+        overflow-y: auto;
+        border-radius: 12px;
+        padding-right: 4px;
+    }
+</style>

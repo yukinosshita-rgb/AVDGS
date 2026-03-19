@@ -1,0 +1,118 @@
+﻿@model AVDGS.Web.Models.ViewModels.OperationsEntryVM
+@{
+    ViewData["Title"] = "Manual Entry";
+}
+
+<div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+    <div>
+        <h1 class="h2 fw-bold mb-1">@Model.PageTitle</h1>
+        <div class="text-secondary">@Model.PageSubtitle</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-light avdgs-btn-ghost"
+           asp-controller="Operations" asp-action="Index">
+            Back to Operations
+        </a>
+    </div>
+</div>
+
+<div class="avdgs-card">
+    <form asp-action="Entry" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+            <div class="col-12 col-lg-6">
+                <label class="form-label text-secondary">Aircraft Type</label>
+                <select class="form-select" asp-for="AircraftTypeId" asp-items="Model.AircraftOptions"></select>
+                <span class="text-danger small" asp-validation-for="AircraftTypeId"></span>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <label class="form-label text-secondary">Operation Mode</label>
+                <select class="form-select" asp-for="ModeId" asp-items="Model.ModeOptions"></select>
+                <span class="text-danger small" asp-validation-for="ModeId"></span>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <label class="form-label text-secondary">Start Time</label>
+                <input class="form-control" type="datetime-local" name="StartTimeLocal"
+                       value="@Model.StartTimeLocal.ToString("yyyy-MM-ddTHH:mm")" />
+                <span class="text-danger small" asp-validation-for="StartTimeLocal"></span>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <label class="form-label text-secondary">End Time</label>
+                <input class="form-control" type="datetime-local" name="EndTimeLocal"
+                       value="@Model.EndTimeLocal.ToString("yyyy-MM-ddTHH:mm")" />
+                <span class="text-danger small" asp-validation-for="EndTimeLocal"></span>
+            </div>
+
+            <div class="col-12">
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" asp-for="IsSuccess" />
+                    <label class="form-check-label">Mark as SUCCESS</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label text-secondary">Notes (optional)</label>
+                <textarea class="form-control" rows="2" asp-for="Notes"></textarea>
+                <span class="text-danger small" asp-validation-for="Notes"></span>
+            </div>
+
+            <div class="col-12">
+                <hr class="border-secondary-subtle" />
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="hasInc" asp-for="HasIncident" />
+                    <label class="form-check-label">Add an Incident to this Session</label>
+                </div>
+            </div>
+
+            <div class="col-12" id="incBox" style="display:none;">
+                <div class="row g-3">
+                    <div class="col-12 col-lg-3">
+                        <label class="form-label text-secondary">Severity</label>
+                        <select class="form-select" asp-for="Severity">
+                            <option>LOW</option>
+                            <option>MEDIUM</option>
+                            <option>HIGH</option>
+                        </select>
+                        <span class="text-danger small" asp-validation-for="Severity"></span>
+                    </div>
+
+                    <div class="col-12 col-lg-9">
+                        <label class="form-label text-secondary">Incident Title</label>
+                        <input class="form-control" asp-for="IncidentTitle" />
+                        <span class="text-danger small" asp-validation-for="IncidentTitle"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-secondary">Incident Description</label>
+                        <textarea class="form-control" rows="3" asp-for="IncidentDescription"></textarea>
+                        <span class="text-danger small" asp-validation-for="IncidentDescription"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                <a class="btn btn-outline-light" asp-controller="Operations" asp-action="Index">Cancel</a>
+                <button type="submit" class="btn btn-info">
+                    <i class="bi bi-save me-2"></i>Save Session
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const cb = document.getElementById('hasInc');
+        const box = document.getElementById('incBox');
+
+        function sync() { box.style.display = cb.checked ? '' : 'none'; }
+        cb.addEventListener('change', sync);
+        sync();
+    </script>
+}

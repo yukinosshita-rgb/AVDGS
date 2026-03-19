@@ -1,0 +1,98 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - A-VDGS</title>
+
+    <!-- Bootstrap 5.3.x -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- ✅ Added so specific pages like Reports can load their own CSS -->
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="avdgs-body">
+    @{
+        var isLoggedIn = User?.Identity?.IsAuthenticated ?? false;
+        var hideNav = (ViewData["HideNav"] as bool? ?? false) || !isLoggedIn;
+
+        var logoUrl = Url.Content("~/image/mock/FastLogo.png");
+        var activeTab = ViewData["ActiveTab"]?.ToString() ?? "";
+    }
+
+    @if (!hideNav)
+    {
+        <header class="avdgs-topbar border-bottom border-secondary-subtle">
+            <nav class="navbar navbar-expand-lg navbar-dark container-fluid px-3 px-lg-4">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Dashboard" asp-action="Index">
+
+                    <img src="@logoUrl"
+                         asp-append-version="true"
+                         alt="FAST Logo"
+                         class="brand-logo" />
+
+                    <div>
+                        <div class="brand-title">A-VDGS</div>
+                        <div class="brand-subtitle">Advanced Visual Docking Guidance</div>
+                    </div>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNav"
+                        aria-controls="topNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="topNav">
+                    <ul class="navbar-nav mx-auto gap-lg-2 mt-3 mt-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link avdgs-tab @(activeTab == "Overview" ? "active" : "")"
+                               asp-controller="Dashboard" asp-action="Index">Overview</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link avdgs-tab @(activeTab == "Docking" ? "active" : "")"
+                               asp-controller="Docking" asp-action="Index">Docking</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link avdgs-tab @(activeTab == "Operations" ? "active" : "")"
+                               asp-controller="Operations" asp-action="Index">Operations</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link avdgs-tab @(activeTab == "Reports" ? "active" : "")"
+                               asp-controller="Reports" asp-action="Index">Reports</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link avdgs-tab @(activeTab == "Settings" ? "active" : "")"
+                               asp-controller="Settings" asp-action="Index">Settings</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-secondary small">Hi, @User.Identity?.Name</span>
+
+                        <a class="btn btn-info avdgs-login-btn"
+                           asp-controller="Account" asp-action="Logout">
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    <main class="container-fluid px-3 px-lg-4 py-4">
+        @RenderBody()
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
